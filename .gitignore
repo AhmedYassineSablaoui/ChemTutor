@@ -1,0 +1,58 @@
+# Python/Django
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.sqlite3
+backend/db.sqlite3
+
+# Node.js/React
+frontend/node_modules/
+frontend/.pnp.*
+frontend/.yarn/*
+frontend/.yarnrc.yml
+frontend/.cache/
+frontend/build/
+frontend/dist/
+frontend/coverage/
+
+# Docker
+*.dockerignore
+docker-compose.override.yml
+*.log
+*.sock
+*.pid
+postgres_data/
+
+# ML/Model
+model/models/*
+model/data/*
+!model/data/.gitkeep
+!model/models/.gitkeep
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+*.swp
+*.bak
+*.tmp
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local

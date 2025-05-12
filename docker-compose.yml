@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/chemtutor
+    depends_on:
+      - db
+    networks:
+      - chemtutor-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    command: npm start
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - chemtutor-network
+
+  db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=chemtutor
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chemtutor-network
+
+  model:
+    build:
+      context: ./model
+      dockerfile: Dockerfile
+    volumes:
+      - ./model:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - chemtutor-network
+
+volumes:
+  postgres_data:
+
+networks:
+  chemtutor-network:
+    driver: bridge
