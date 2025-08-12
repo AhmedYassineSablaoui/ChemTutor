@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: chemtutor_db
+      POSTGRES_USER: chemtutor_user
+      POSTGRES_PASSWORD: chemtutor__password_100  
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=li_vdhNYHd1IC7TNnoAo1RS3Ox1JUo7GBH4lV_91pYcFvptFbxwKWnWoqfU7qB0ZaCc 
+      - DATABASE_URL=postgres://chemtutor_user:chemtutor__password_100@db:5432/chemtutor_db
+      - REDIS_URL=redis://redis:6379/0
+
+volumes:
+  db_data:
