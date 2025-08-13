@@ -29,11 +29,12 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - .env
     environment:
       - DEBUG=1
-      - SECRET_KEY=li_vdhNYHd1IC7TNnoAo1RS3Ox1JUo7GBH4lV_91pYcFvptFbxwKWnWoqfU7qB0ZaCc 
-      - DATABASE_URL=postgres://chemtutor_user:chemtutor__password_100@db:5432/chemtutor_db
       - REDIS_URL=redis://redis:6379/0
 
 volumes:
   db_data:
+
