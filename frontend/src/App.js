@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { healthCheck } from './api';
 import Navbar from './components/Navbar';
+import FeatureSelector from './components/FeatureSelector';
 
 function About() { return <h1>About ChemTutor</h1>; }
 function Login() { return <h1>Login</h1>; }
@@ -33,6 +34,7 @@ function Home() {
     <div>
       <h1>Home - API Status: {status || 'Loading...'}</h1>
       {error && <p className="text-danger">{error}</p>}
+      <FeatureSelector />
     </div>
   );
 }
