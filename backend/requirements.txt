@@ -2,4 +2,11 @@ django==4.2.7
 djangorestframework==3.14.0
 psycopg2-binary==2.9.9
 redis==5.0.1
+django-cors-headers==4.3.1
 # Add more later for tools
+rdkit==2023.9.6 #for molecule parsing and reactions 
+pubchempy==1.0.4 #for compound metadata 
+transformers==4.41.2 #for loading ChemBerta
+torch==2.3.0 #Required for transformers cpu version
+
+
