@@ -31,6 +31,7 @@ services:
 
   backend:
     build: ./backend
+    dns: ["8.8.8.8", "1.1.1.1"]
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app

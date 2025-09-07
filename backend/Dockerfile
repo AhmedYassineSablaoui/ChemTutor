@@ -1,17 +1,17 @@
 FROM python:3.11-slim
 
-# Install system dependencies needed by RDKit for drawing
+# System deps (RDKit + HTTPS + curl/ping for debugging)
 RUN apt-get update && apt-get install -y \
-    libxrender1 \
-    libxext6 \
-    libsm6 \
+    libxrender1 libxext6 libsm6 ca-certificates \
+    curl iputils-ping \
+ && update-ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
 
-# Force NumPy < 2 to avoid compatibility issues with RDKit
+# Force NumPy < 2 to avoid RDKit issues
 RUN pip install --no-cache-dir "numpy<2" && \
     pip install --no-cache-dir -r requirements.txt
 
