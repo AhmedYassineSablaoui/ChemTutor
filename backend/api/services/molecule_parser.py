@@ -25,16 +25,19 @@ FALLBACKS = {
     "sodium chloride": "[Na+].[Cl-]"
 }
 
-def fetch_from_pubchem(identifier: str, id_type: str = "name") -> str:
-    """Fetch SMILES from PubChem by name, formula, cid, or inchikey."""
+def fetch_from_pubchem(identifier: str, id_type: str = "name") -> Chem.Mol:
+    """Fetch molecule as RDKit Mol from PubChem by name, formula, cid, or inchikey."""
     url = f"{PUBCHEM_BASE}/{id_type}/{identifier}/property/CanonicalSMILES/TXT"
     resp = requests.get(url, timeout=10)
     if resp.status_code == 200 and resp.text.strip():
-        return resp.text.strip()
+        smiles = resp.text.strip()
+        mol = Chem.MolFromSmiles(smiles)
+        if mol:
+            return mol
     raise ValueError(f"No PubChem match for {id_type}: {identifier}")
 
-def parse_molecule(user_input: str) -> str:
-    """Parse molecule input into a valid SMILES string."""
+def parse_molecule(user_input: str) -> Chem.Mol:
+    """Parse molecule input into an RDKit Mol object."""
     if not user_input or not user_input.strip():
         raise ValueError("Empty input is not allowed")
 
@@ -46,7 +49,9 @@ def parse_molecule(user_input: str) -> str:
 
     # 🔹 Local fallback
     if query.lower() in FALLBACKS:
-        return FALLBACKS[query.lower()]
+        mol = Chem.MolFromSmiles(FALLBACKS[query.lower()])
+        if mol:
+            return mol
 
     # 🔹 CID
     if query.isdigit():
@@ -60,7 +65,7 @@ def parse_molecule(user_input: str) -> str:
     if query.startswith("InChI="):
         mol = Chem.MolFromInchi(query)
         if mol:
-            return Chem.MolToSmiles(mol)
+            return mol
 
     # 🔹 Formula
     if re.fullmatch(r"^([A-Z][a-z]?\d*)+$", query):
@@ -72,10 +77,12 @@ def parse_molecule(user_input: str) -> str:
     # 🔹 Direct SMILES
     mol = Chem.MolFromSmiles(query)
     if mol:
-        return Chem.MolToSmiles(mol)
+        return mol
 
     # 🔹 PubChem name lookup
     try:
         return fetch_from_pubchem(query, id_type="name")
     except Exception:
-        raise ValueError(f"Unknown or unsupported molecule: '{user_input}'")
+        pass
+
+    raise ValueError(f"Unknown or unsupported molecule: '{user_input}'")
