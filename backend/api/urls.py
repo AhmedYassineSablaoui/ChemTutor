@@ -1,11 +1,7 @@
-from django.http import JsonResponse
 from django.urls import path
-from .views import health_check
-
-
-
+from .views import health_check, BalanceReactionView
 
 urlpatterns = [
-    
-    path('api/health/', health_check),
+    path('health/', health_check, name="health_check"),
+    path('reactions/balance/', BalanceReactionView.as_view(), name="balance_reaction"),
 ]

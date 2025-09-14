@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# 👇 Add this here
+ENV DJANGO_SETTINGS_MODULE=chemtutor.settings
+
 COPY requirements.txt .
 
 # Force NumPy < 2 to avoid RDKit issues

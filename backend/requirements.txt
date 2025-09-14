@@ -8,5 +8,8 @@ rdkit==2023.9.6 #for molecule parsing and reactions
 pubchempy==1.0.4 #for compound metadata 
 transformers==4.41.2 #for loading ChemBerta
 torch==2.3.0 #Required for transformers cpu version
+pytest==8.3.2
+pytest-django==4.9.0
+
 
 

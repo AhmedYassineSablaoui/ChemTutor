@@ -14,6 +14,7 @@ SYNONYMS = {
     "vinegar": "acetic acid",
     "wood alcohol": "methanol"
 }
+
 FALLBACKS = {
     "water": "O",
     "ethanol": "CCO",
@@ -25,6 +26,19 @@ FALLBACKS = {
     "sodium chloride": "[Na+].[Cl-]"
 }
 
+# 🔹 Common chemical formulas mapped to SMILES (fast + offline)
+FORMULA_MAP = {
+    "H2": "[H][H]",        # hydrogen gas
+    "O2": "O=O",           # oxygen gas
+    "N2": "N#N",           # nitrogen gas
+    "H2O": "O",            # water
+    "CO2": "O=C=O",        # carbon dioxide
+    "NH3": "N",            # ammonia
+    "CH4": "C",            # methane
+    "NaCl": "[Na+].[Cl-]"  # sodium chloride
+}
+
+
 def fetch_from_pubchem(identifier: str, id_type: str = "name") -> Chem.Mol:
     """Fetch molecule as RDKit Mol from PubChem by name, formula, cid, or inchikey."""
     url = f"{PUBCHEM_BASE}/{id_type}/{identifier}/property/CanonicalSMILES/TXT"
@@ -35,6 +49,7 @@ def fetch_from_pubchem(identifier: str, id_type: str = "name") -> Chem.Mol:
         if mol:
             return mol
     raise ValueError(f"No PubChem match for {id_type}: {identifier}")
+
 
 def parse_molecule(user_input: str) -> Chem.Mol:
     """Parse molecule input into an RDKit Mol object."""
@@ -67,8 +82,12 @@ def parse_molecule(user_input: str) -> Chem.Mol:
         if mol:
             return mol
 
-    # 🔹 Formula
+    # 🔹 Formula (try local map first, then PubChem)
     if re.fullmatch(r"^([A-Z][a-z]?\d*)+$", query):
+        if query in FORMULA_MAP:
+            mol = Chem.MolFromSmiles(FORMULA_MAP[query])
+            if mol:
+                return mol
         try:
             return fetch_from_pubchem(query, id_type="formula")
         except Exception:
