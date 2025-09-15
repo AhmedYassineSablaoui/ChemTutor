@@ -71,13 +71,15 @@ const commonCompounds = [
           Enter Reaction (e.g., H2 + O2 -&gt; H2O)
         </label>
         <textarea
-          id="reactionInput"
-          className={`form-control ${error ? 'is-invalid' : ''}`}
-          rows={3}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Reactants + Reactants -> Products + Products"
-        />
+  id="reactionInput"
+  className={`form-control ${error ? "is-invalid" : ""}`}
+  rows={3}
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  placeholder="Reactants + Reactants -> Products + Products"
+  title='Use "->" to separate reactants and products (e.g., H2 + O2 -> H2O)'
+/>
+
         {error && <div className="invalid-feedback">{error}</div>}
       </div>
 
