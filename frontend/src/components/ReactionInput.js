@@ -5,7 +5,30 @@ const ReactionInput = ({ onSubmit }) => {
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
-  const commonCompounds = ['H2O', 'NaCl', 'H2SO4', 'NaOH', 'CO2', 'O2', 'H2']; // Expand later
+const commonCompounds = [
+  // Original List
+  'H2O', 'NaCl', 'H2SO4', 'NaOH', 'CO2', 'O2', 'H2',
+
+  // Common Acids
+  'HCl', 'HNO3', 'H3PO4', 'CH3COOH',
+
+  // Common Bases
+  'KOH', 'Ca(OH)2', 'NH3',
+
+  // Common Salts
+  'KCl', 'AgNO3', 'CuSO4', 'NaHCO3', 'CaCO3', 'KNO3',
+
+  // Simple Organic Compounds
+  'CH4',      // Methane
+  'C2H5OH',   // Ethanol
+  'C3H8',     // Propane
+  'C6H12O6',  // Glucose
+  'C6H6',     // Benzene
+  'CH3OH',    // Methanol
+
+  // Common Gases & Oxides
+  'N2', 'Cl2', 'CO', 'SO2', 'NO2', 'H2O2'
+]; // Expand later
 
   // Handle form submit
   const handleSubmit = (e) => {

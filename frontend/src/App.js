@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { healthCheck } from './api';
 import Navbar from './components/Navbar';
 import FeatureSelector from './components/FeatureSelector';
+import FormatterPage from './pages/FormatterPage';
 
 function About() { return <h1>About ChemTutor</h1>; }
 function Login() { return <h1>Login</h1>; }
@@ -49,7 +50,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path='/formatter' element={<ReactionFormatter />} />
+          <Route path='/formatter' element={<FormatterPage />} />
           <Route path='/qa' element={<QandA />} />
           <Route path='/correction' element={<Correction />} />
           <Route path='/logout' element={<Logout />} />
