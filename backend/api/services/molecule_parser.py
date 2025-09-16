@@ -2,6 +2,7 @@ import re
 import requests
 from rdkit import Chem
 from rdkit import RDLogger
+from .compound_lookup import lookup_compound
 
 RDLogger.DisableLog('rdApp.error')
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
@@ -103,5 +104,23 @@ def parse_molecule(user_input: str) -> Chem.Mol:
         return fetch_from_pubchem(query, id_type="name")
     except Exception:
         pass
+    
+    if not mol : 
+        metadata = lookup_compound(query)
+        if metadata and metadata.get('smiles') :
+            mol = Chem.MolFromSmiles(metadata['smiles'])
+    if mol:
+        return mol
 
-    raise ValueError(f"Unknown or unsupported molecule: '{user_input}'")
+        # If nothing worked, try a metadata lookup for suggestions
+    meta = lookup_compound(query)
+    if meta and meta.get("synonyms"):
+        suggestions = ', '.join(meta['synonyms'])
+        raise ValueError(
+            f"Unknown or unsupported molecule: '{query}'. "
+            f"Did you mean: {suggestions}?"
+        )
+
+    raise ValueError(f"Unknown or unsupported molecule: '{query}'")
+
+

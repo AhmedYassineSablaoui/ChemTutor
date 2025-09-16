@@ -2,6 +2,8 @@ from .molecule_parser import parse_molecule
 from rdkit.Chem import AllChem, rdDepictor
 from typing import List, Dict
 from rdkit import Chem
+from .compound_lookup import lookup_compound
+
 
 def parse_reaction(input_reaction: str) -> Dict:
     """
@@ -56,8 +58,29 @@ def balance_reaction(input_reaction: str) -> Dict:
         'reactants': [calculate_oxidation_states(m) for m in parsed['reactants']],
         'products': [calculate_oxidation_states(m) for m in parsed['products']],
     }
+    #metadata fetch 
+    metadata = {}
+    for side, tokens, mols in [
+        ('reactants', input_reaction.split('->')[0].split('+'), parsed['reactants']),
+        ('products', input_reaction.split('->')[1].split('+'), parsed['products'])
+    ]:
+        metadata[side] = []
+        for token, mol in zip(tokens, mols):
+            token = token.strip()
+            meta = lookup_compound(token) or {}
+            metadata[side].append({
+                'coeff': 1,  # placeholder
+                'input': token,
+                'smiles': Chem.MolToSmiles(mol),
+                'iupac': meta.get('iupac_name', 'Unknown'),
+                'formula': meta.get('formula', 'Unknown'),
+                'synonyms': meta.get('synonyms', []),
+                'mol_weight': meta.get('molecular_weight', None)
+            })
+
     return {
         'balanced': f"{react_str} -> {prod_str}",
         'type': rxn_type,
         'oxidation_states': ox_states,
+        'metadata': metadata
     }
