@@ -1,0 +1,81 @@
+# 🧪 ChemTutor
+
+ChemTutor is an **AI-powered chemistry assistant** that can:
+- 🧬 Answer chemistry questions with step-by-step reasoning
+- ⚗️ Balance and explain chemical reactions
+- 📚 Review and correct chemistry content submitted by users
+
+It combines modern AI models with chemistry-specific tools like **RDKit** and **PubChemPy** to provide accurate, structured, and educational answers.
+
+---
+
+## 🚀 Features
+
+- **Q&A** – Ask chemistry questions and get detailed explanations  
+- **Reaction Formatter** – Balance chemical equations automatically  
+- **Content Review** – Submit text and get corrections + explanations  
+- **Compound Lookup** – Metadata, molecular weight, and synonyms  
+- **AI-Powered** – Uses ChemBERTa + Transformers + optional LangChain/LlamaIndex  
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer        | Tech Used |
+|--------------|-----------|
+| 🌐 Frontend  | React.js + Bootstrap + MUI |
+| 🔄 Backend   | Django REST Framework |
+| 🧠 AI Core   | ChemBERTa, Transformers, Torch |
+| 🧪 Tools     | RDKit, PubChemPy |
+| 🔍 Retrieval | LlamaIndex (optional), local chemistry PDFs |
+| 🐳 Runtime   | Docker + WSL2 |
+| 📊 Database  | PostgreSQL, Redis |
+
+---
+
+## 📂 Project Structure
+
+ChemTutor/
+├── backend/ # Django REST API
+├── frontend/ # React.js frontend
+├── .env # Environment variables
+├── docker-compose.yml
+├── package.json
+├── pytest.ini
+└── README.md
+
+
+---
+
+## ⚡ Quick Start (Docker)
+
+1. Clone the repo:
+   ```
+   git clone https://github.com/AhmedYassineSablaoui/ChemTutor.git
+   cd ChemTutor
+2. Create an .env file in the root directory with your configs (DB, Redis, API keys if needed).
+3. docker-compose up --build
+4. Access:
+
+ Frontend: http://localhost:3000
+
+Backend API: http://localhost:8000/api
+
+## ✅ Testing
+
+Run backend tests:
+
+docker-compose exec backend pytest
+
+## 📌 Roadmap
+
+ Improve balancing for complex reactions
+
+ Add reaction mechanism explanations
+
+ Integrate literature retrieval with LlamaIndex
+
+ ## 📜 License
+ MIT License – Free to use and modify.
+
+
