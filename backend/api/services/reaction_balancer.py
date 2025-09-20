@@ -84,3 +84,26 @@ def balance_reaction(input_reaction: str) -> Dict:
         'oxidation_states': ox_states,
         'metadata': metadata
     }
+    # Add thermo + mechanism hints
+    result['thermo_estimate'] = estimate_thermo(result['metadata'])
+    result['mechanism_hint'] = get_mechanism_hint(result['type'])
+
+    return result
+    
+
+# Simple delta H placeholder (real: use NIST or db, but for MVP):
+def estimate_thermo(metadata: Dict) -> Dict:
+    total_bp_react = sum(m.get('boiling_point', 0) for m in metadata['reactants'])
+    # Rough: exothermic if products lower BP
+    return {'estimated_delta_h': '<0 kJ/mol (exothermic)' if total_bp_react > sum(m.get('boiling_point', 0) for m in metadata['products']) else '>0 kJ/mol (endothermic)'}
+
+
+
+def get_mechanism_hint(rxn_type: str) -> str:
+    hints = {
+        'acid-base': 'Proton transfer mechanism.',
+        'redox': 'Electron transfer via half-reactions.',
+        # Add more
+    }
+    return hints.get(rxn_type, 'Consult mechanism diagram.')
+

@@ -45,6 +45,15 @@ const FormatterPage = () => {
                 <pre>{JSON.stringify(result.oxidation_states, null, 2)}</pre>
               </details>
             )}
+            {result.thermo_estimate && <p><strong>Thermo hint:</strong>{result.thermo_estimate}</p>}
+            {result.mechanism_hint && <p><strong>Mechanism:</strong> {result.mechanism_hint}</p>}
+            {result.metadata && (
+      <details>
+        <summary>Metadata</summary>
+        <ul>
+          {result.metadata.reactants.map((r, i) => ( <li key={i}>{r.coeff} x {r.iupac}</li>))}</ul>
+      </details>
+    )}
           </div>
         </div>
       )}

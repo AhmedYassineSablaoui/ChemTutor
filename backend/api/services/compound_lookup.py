@@ -17,7 +17,9 @@ def lookup_compound(query: str) -> Optional[Dict]:
             'smiles': compound.isomeric_smiles,
             # ✅ keep synonyms under 50 chars, max 3
             'synonyms': [s for s in compound.synonyms if len(s) < 50][:3],
-            'molecular_weight': compound.molecular_weight
+            'molecular_weight': compound.molecular_weight,
+            'boiling_point': compound.boiling_point if hasattr(compound, 'boiling_point') else None,
+            'melting_point': compound.melting_point,
         }
     except Exception as e:
         print(f"PubChem error: {e}")
