@@ -13,8 +13,14 @@ const FormatterPage = () => {
       const data = await balanceReaction(reaction);
       setResult(data);
     } catch (err) {
-      console.error("Error balancing reaction:", err);
-      toast.error(`Invalid reaction: ${err.response?.data?.error || "Unknown error"}`);
+  if (err.code === "ECONNABORTED") {
+    toast.error("⏳ Request timed out — try again.");
+  } else {
+    toast.error(`Invalid reaction: ${err.response?.data?.error || "Unknown error"}`);
+  }
+  console.error("Error balancing reaction:", err);
+
+
     } finally {
       setLoading(false);
     }
@@ -25,7 +31,7 @@ const FormatterPage = () => {
       <h2>⚗️ Reaction Formatter</h2>
       <ReactionInput onSubmit={handleSubmit} />
 
-      {loading && <p>⏳ Balancing reaction...</p>}
+      {loading && <p>⏳ Balancing reaction...this might take a few seconds.</p>}
 
       {result && (
         <div className="card mt-4">

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000/api/',  // Points to Django
-  timeout: 5000, // 5 second timeout
+  timeout: 40000, // 40 second timeout
   headers: { "Content-Type": "application/json" },
 
 });
