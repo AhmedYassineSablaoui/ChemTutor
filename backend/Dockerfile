@@ -20,4 +20,8 @@ RUN pip install --no-cache-dir "numpy<2" && \
 
 COPY . .
 
+# 👇 Copy your fine-tuned models into container
+# Make sure you have backend/models/chem locally before building
+COPY models/chemberta/fine_tuned_t5_chem_small/fine_tuned_t5_chem_small /app/models/chemberta/fine_tuned_t5_chem_small
+
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
