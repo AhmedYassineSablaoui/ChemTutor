@@ -15,7 +15,7 @@ It combines modern AI models with chemistry-specific tools like **RDKit** and **
 - **Reaction Formatter** – Balance chemical equations automatically  
 - **Content Review** – Submit text and get corrections + explanations  
 - **Compound Lookup** – Metadata, molecular weight, and synonyms  
-- **AI-Powered** – Uses ChemBERTa + Transformers + optional LangChain/LlamaIndex  
+- **AI-Powered** – Uses T-5 small + Transformers + optional LangChain/LlamaIndex  
 
 ---
 
@@ -25,7 +25,7 @@ It combines modern AI models with chemistry-specific tools like **RDKit** and **
 |--------------|-----------|
 | 🌐 Frontend  | React.js + Bootstrap + MUI |
 | 🔄 Backend   | Django REST Framework |
-| 🧠 AI Core   | ChemBERTa, Transformers, Torch |
+| 🧠 AI Core   | T-5 small, Transformers, Torch |
 | 🧪 Tools     | RDKit, PubChemPy |
 | 🔍 Retrieval | LlamaIndex (optional), local chemistry PDFs |
 | 🐳 Runtime   | Docker + WSL2 |

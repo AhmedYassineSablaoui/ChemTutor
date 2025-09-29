@@ -8,7 +8,7 @@ It handles:
 - Reaction balancing
 - Compound lookup
 - Health checks
-- Communication with AI models (ChemBERTa, Transformers)
+- Communication with AI models (T-5 small, Transformers)
 
 ---
 

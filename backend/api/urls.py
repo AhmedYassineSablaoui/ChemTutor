@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import health_check, BalanceReactionView
+from .views import health_check, BalanceReactionView, QAAView
 
 urlpatterns = [
     path('health/', health_check, name="health_check"),
     path('reactions/balance/', BalanceReactionView.as_view(), name="balance_reaction"),
+    path('qa/', QAAView.as_view(), name="qa"),
 ]

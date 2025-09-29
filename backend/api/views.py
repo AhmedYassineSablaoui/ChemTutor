@@ -5,13 +5,24 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from api.services.reaction_balancer import balance_reaction
 from api.services.compound_lookup import lookup_compound
-
+from api.services.chemberta_service import ChemBERTaService
+from api.services.retrieval_service import RetrievalService
 
 @api_view(["GET"])
 def health_check(request):
     return Response({"status": "ok"})
 
-
+class QAAView(APIView):
+    def post(self, request):
+        question = request.data.get('question')
+        if not question:
+            return Response({'error': 'Missing question'}, status=400)
+        retriever = RetrievalService()
+        context_list = retriever.retrieve(question)
+        context = "\n".join(context_list)
+        generator = ChemBERTaService()
+        answer = generator.generate_answer(f"Context: {context}\nQuestion: {question}")
+        return Response({'answer': answer, 'sources': context})
 class BalanceReactionView(APIView):
     def post(self, request):
         input_reaction = request.data.get('input')
