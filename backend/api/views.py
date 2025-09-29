@@ -13,16 +13,24 @@ def health_check(request):
     return Response({"status": "ok"})
 
 class QAAView(APIView):
+    def __init__(self):
+        super().__init__()
+        # Initialize services once when the view is created
+        self.retriever = RetrievalService()
+        self.generator = ChemBERTaService()
+    
     def post(self, request):
         question = request.data.get('question')
         if not question:
             return Response({'error': 'Missing question'}, status=400)
-        retriever = RetrievalService()
-        context_list = retriever.retrieve(question)
-        context = "\n".join(context_list)
-        generator = ChemBERTaService()
-        answer = generator.generate_answer(f"Context: {context}\nQuestion: {question}")
-        return Response({'answer': answer, 'sources': context})
+        
+        try:
+            context_list = self.retriever.retrieve(question)
+            context = "\n".join(context_list)
+            answer = self.generator.generate_answer(f"Context: {context}\nQuestion: {question}")
+            return Response({'answer': answer, 'sources': context_list})
+        except Exception as e:
+            return Response({'error': f'Processing failed: {str(e)}'}, status=500)
 class BalanceReactionView(APIView):
     def post(self, request):
         input_reaction = request.data.get('input')

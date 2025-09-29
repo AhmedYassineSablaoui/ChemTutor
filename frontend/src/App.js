@@ -6,6 +6,7 @@ import { healthCheck } from './api';
 import Navbar from './components/Navbar';
 import FeatureSelector from './components/FeatureSelector';
 import FormatterPage from './pages/FormatterPage';
+import QAPage from './pages/QAPage';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { ToastContainer } from "react-toastify";
@@ -15,7 +16,6 @@ function About() { return <h1>About ChemTutor</h1>; }
 function Login() { return <h1>Login</h1>; }
 function Register() { return <h1>Register</h1>; }
 function Correction() { return <h1>Correction</h1>; }
-function QandA() { return <h1>Q&A</h1>; }
 function Logout() { return <h1>Logout</h1>; }
 
 function Home() {
@@ -64,7 +64,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/formatter" element={<FormatterPage />} />
-          <Route path="/qa" element={<QandA />} />
+          <Route path="/qa" element={<QAPage />} />
           <Route path="/correction" element={<Correction />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
