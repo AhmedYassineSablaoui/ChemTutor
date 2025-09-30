@@ -3,6 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from api.services.reaction_balancer import balance_reaction
 from api.services.compound_lookup import lookup_compound
 from api.services.chemberta_service import ChemBERTaService
@@ -61,3 +65,53 @@ class BalanceReactionView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        email = request.data.get('email')
+
+        if not username or not password:
+            return Response({'error': 'username and password are required'}, status=400)
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'username already taken'}, status=400)
+
+        user = User.objects.create_user(username=username, password=password, email=email)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email}})
+
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return Response({'error': 'username and password are required'}, status=400)
+        user = authenticate(username=username, password=password)
+        if not user:
+            return Response({'error': 'invalid credentials'}, status=401)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email}})
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Delete the token to logout
+        Token.objects.filter(user=request.user).delete()
+        return Response({'success': True})
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({'id': user.id, 'username': user.username, 'email': user.email})

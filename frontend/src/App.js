@@ -11,10 +11,12 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function About() { return <h1>About ChemTutor</h1>; }
-function Login() { return <h1>Login</h1>; }
-function Register() { return <h1>Register</h1>; }
+function Login() { return <LoginPage />; }
+function Register() { return <RegisterPage />; }
 function Correction() { return <h1>Correction</h1>; }
 function Logout() { return <h1>Logout</h1>; }
 

@@ -7,6 +7,15 @@ const api = axios.create({
 
 });
 
+// Attach Authorization header if token exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers['Authorization'] = `Token ${token}`;
+  }
+  return config;
+});
+
 export const healthCheck = async () => {
   try {
     const response = await api.get('health/');
@@ -33,3 +42,36 @@ export const askQuestion = async (question, category) => {
     throw error;
   }
 };
+
+// Auth APIs
+export const registerUser = async (username, password, email) => {
+  const res = await api.post('auth/register/', { username, password, email });
+  return res.data;
+};
+
+export const loginUser = async (username, password) => {
+  const res = await api.post('auth/login/', { username, password });
+  return res.data;
+};
+
+export const logoutUser = async () => {
+  const res = await api.post('auth/logout/');
+  return res.data;
+};
+
+export const fetchMe = async () => {
+  const res = await api.get('auth/me/');
+  return res.data;
+};
+
+export const saveAuth = (token, user) => {
+  localStorage.setItem('auth_token', token);
+  if (user) localStorage.setItem('auth_user', JSON.stringify(user));
+};
+
+export const clearAuth = () => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+};
+
+export default api;
