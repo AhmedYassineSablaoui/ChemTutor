@@ -26,7 +26,6 @@ export const healthCheck = async () => {
   }
 };
 
-// Balance reaction
 export const balanceReaction = async (input) => {
   const res = await api.post("reactions/balance/", { input });
   return res.data;
@@ -39,6 +38,17 @@ export const askQuestion = async (question, category) => {
     return response.data;
   } catch (error) {
     console.error('QA request failed:', error);
+    throw error;
+  }
+};
+
+// Correct chemistry statement
+export const correctStatement = async (statement) => {
+  try {
+    const response = await api.post('correction/', { statement });
+    return response.data;
+  } catch (error) {
+    console.error('Correction request failed:', error);
     throw error;
   }
 };

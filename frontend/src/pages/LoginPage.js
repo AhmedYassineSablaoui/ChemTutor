@@ -10,10 +10,12 @@ import {
   Button,
   InputAdornment,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LoginIcon from '@mui/icons-material/Login';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -39,73 +41,77 @@ const LoginPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '70vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
-        borderRadius: 2,
-        p: 2
-      }}
-    >
-      <Card elevation={6} sx={{ width: '100%', maxWidth: 420, borderRadius: 3 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h5" fontWeight={700} gutterBottom>
-            Welcome back
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            Sign in to continue to ChemTutor
-          </Typography>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          🔐 Sign in to ChemTutor
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Access your saved work and personalized features
+        </Typography>
+      </Box>
 
-          {error && (
-            <Box className="alert alert-danger" sx={{ mb: 2 }}>{error}</Box>
-          )}
-
-          <form onSubmit={onSubmit}>
-            <TextField
-              fullWidth
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              margin="normal"
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword((s) => !s)} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 2, textTransform: 'none' }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
-            </Button>
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              No account? <Link to="/register">Create one</Link>
+      {/* Main Login Card */}
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Card variant="outlined" sx={{ width: '100%', maxWidth: 500 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+              Login
             </Typography>
-          </form>
-        </CardContent>
-      </Card>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+            )}
+
+            <form onSubmit={onSubmit}>
+              <TextField
+                fullWidth
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                margin="normal"
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword((s) => !s)} edge="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <LoginIcon />}
+                sx={{ mt: 3, mb: 1, py: 1.5 }}
+                disabled={loading}
+              >
+                {loading ? 'Signing in…' : 'Sign in'}
+              </Button>
+              <Typography variant="body2" textAlign="center" color="text.secondary" sx={{ mt: 1 }}>
+                No account?{' '}
+                <Link to="/register" style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}>
+                  Create one
+                </Link>
+              </Typography>
+            </form>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };
