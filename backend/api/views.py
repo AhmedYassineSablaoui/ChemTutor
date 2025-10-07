@@ -12,8 +12,13 @@ from api.services.compound_lookup import lookup_compound
 from api.services.orchestrator import Orchestrator
 import logging
 import traceback
+import time
 from rest_framework import serializers
 from rest_framework.throttling import UserRateThrottle
+from .models import (
+    UserProfile, LoginHistory, ReactionFormatter, 
+    QAHistory, CorrectionHistory
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +37,42 @@ class QAAView(APIView):
         if not question:
             return Response({'error': 'Missing question'}, status=400)
         
+        start_time = time.time()
+        user = request.user if request.user.is_authenticated else None
+        
         try:
             result = self.orchestrator.run_workflow("qa", question)
+            response_time = time.time() - start_time
+            
+            # Save to QAHistory table
+            QAHistory.objects.create(
+                user=user,
+                question=question,
+                answer=result.get('answer'),
+                sources=result.get('sources', []),
+                is_successful=True,
+                response_time=response_time
+            )
+            
             return Response({'answer': result.get('answer'), 'sources': result.get('sources', [])})
         except Exception as e:
+            response_time = time.time() - start_time
+            
+            # Save failed attempt to QAHistory table
+            QAHistory.objects.create(
+                user=user,
+                question=question,
+                is_successful=False,
+                error_message=str(e),
+                response_time=response_time
+            )
+            
             return Response({'error': f'Processing failed: {str(e)}'}, status=500)
 class BalanceReactionView(APIView):
     def post(self, request):
         input_reaction = request.data.get('input')
+        user = request.user if request.user.is_authenticated else None
+        
         if not input_reaction:
             return Response(
                 {'error': 'Missing input'},
@@ -60,9 +93,28 @@ class BalanceReactionView(APIView):
                             enriched_metadata[side].append(meta)
 
             result["metadata"] = enriched_metadata
+            
+            # Save to ReactionFormatter table
+            ReactionFormatter.objects.create(
+                user=user,
+                input_reaction=input_reaction,
+                balanced_reaction=result.get('balanced'),
+                reactants=result.get('reactants'),
+                products=result.get('products'),
+                metadata=enriched_metadata,
+                is_successful=True
+            )
 
             return Response(result)
         except ValueError as e:
+            # Save failed attempt to ReactionFormatter table
+            ReactionFormatter.objects.create(
+                user=user,
+                input_reaction=input_reaction,
+                is_successful=False,
+                error_message=str(e)
+            )
+            
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
@@ -140,12 +192,26 @@ class CorrectionView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Perform correction
+            start_time = time.time()
+            user = request.user if request.user.is_authenticated else None
+            
             try:
                 result = self.orchestrator.run_workflow("correction", statement)
                 corrected_statement = result.get('corrected')
+                response_time = time.time() - start_time
                 
                 if not corrected_statement:
                     logger.warning(f"Empty correction result for statement: {statement[:100]}")
+                    
+                    # Save failed attempt to CorrectionHistory table
+                    CorrectionHistory.objects.create(
+                        user=user,
+                        original_statement=statement,
+                        is_successful=False,
+                        error_message='The model returned an empty result',
+                        response_time=response_time
+                    )
+                    
                     return Response({
                         'success': False,
                         'error': 'Correction failed',
@@ -156,6 +222,16 @@ class CorrectionView(APIView):
                 # Determine if the statement was changed
                 changed = statement.lower().strip() != corrected_statement.lower().strip()
                 
+                # Save to CorrectionHistory table
+                CorrectionHistory.objects.create(
+                    user=user,
+                    original_statement=statement,
+                    corrected_statement=corrected_statement,
+                    was_changed=changed,
+                    is_successful=True,
+                    response_time=response_time
+                )
+                
                 return Response({
                     'success': True,
                     'original': statement,
@@ -164,8 +240,19 @@ class CorrectionView(APIView):
                 }, status=status.HTTP_200_OK)
                 
             except RuntimeError as e:
+                response_time = time.time() - start_time
                 logger.error(f"Model inference error: {str(e)}")
                 logger.error(traceback.format_exc())
+                
+                # Save failed attempt to CorrectionHistory table
+                CorrectionHistory.objects.create(
+                    user=user,
+                    original_statement=statement,
+                    is_successful=False,
+                    error_message=f'Model inference failed: {str(e)}',
+                    response_time=response_time
+                )
+                
                 return Response({
                     'success': False,
                     'error': 'Model inference failed',
@@ -175,8 +262,19 @@ class CorrectionView(APIView):
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             except Exception as e:
+                response_time = time.time() - start_time
                 logger.error(f"Unexpected error during correction: {str(e)}")
                 logger.error(traceback.format_exc())
+                
+                # Save failed attempt to CorrectionHistory table
+                CorrectionHistory.objects.create(
+                    user=user,
+                    original_statement=statement,
+                    is_successful=False,
+                    error_message=f'Processing error: {str(e)}',
+                    response_time=response_time
+                )
+                
                 return Response({
                     'success': False,
                     'error': 'Correction processing failed',
@@ -222,19 +320,63 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        
         if not username or not password:
             return Response({'error': 'username and password are required'}, status=400)
+        
         user = authenticate(username=username, password=password)
+        
+        # Get client info
+        ip_address = self.get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        
         if not user:
+            # Log failed login attempt (optional - you can create a FailedLoginAttempt model if needed)
             return Response({'error': 'invalid credentials'}, status=401)
+        
         token, _ = Token.objects.get_or_create(user=user)
+        
+        # Save successful login to LoginHistory table
+        LoginHistory.objects.create(
+            user=user,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            session_token=token.key,
+            is_successful=True
+        )
+        
         return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email}})
+    
+    def get_client_ip(self, request):
+        """Get the client's IP address from the request"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # Update logout time in LoginHistory
+        try:
+            from django.utils import timezone
+            token = Token.objects.get(user=request.user)
+            login_record = LoginHistory.objects.filter(
+                user=request.user,
+                session_token=token.key,
+                logout_time__isnull=True
+            ).first()
+            
+            if login_record:
+                login_record.logout_time = timezone.now()
+                login_record.save()
+        except Exception as e:
+            logger.warning(f"Could not update logout time: {str(e)}")
+        
         # Delete the token to logout
         Token.objects.filter(user=request.user).delete()
         return Response({'success': True})
