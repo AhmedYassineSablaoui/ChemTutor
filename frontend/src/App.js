@@ -14,6 +14,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 
 function About() { return <h1>About ChemTutor</h1>; }
 function Login() { return <LoginPage />; }
@@ -68,6 +69,7 @@ function App() {
           <Route path="/formatter" element={<FormatterPage />} />
           <Route path="/qa" element={<QAPage />} />
           <Route path="/correction" element={<CorrectionPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </div>

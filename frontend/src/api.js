@@ -84,4 +84,25 @@ export const clearAuth = () => {
   localStorage.removeItem('auth_user');
 };
 
+// Profile APIs
+export const fetchProfile = async () => {
+  const res = await api.get('auth/profile/');
+  return res.data;
+};
+
+export const updateProfile = async (email, currentPassword, newPassword) => {
+  const data = { email };
+  if (currentPassword && newPassword) {
+    data.current_password = currentPassword;
+    data.new_password = newPassword;
+  }
+  const res = await api.put('auth/profile/', data);
+  return res.data;
+};
+
+export const deleteAccount = async (password) => {
+  const res = await api.delete('auth/profile/', { data: { password } });
+  return res.data;
+};
+
 export default api;

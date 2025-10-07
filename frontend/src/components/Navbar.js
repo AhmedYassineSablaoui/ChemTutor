@@ -47,6 +47,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           ) : (
             <>
               <span className="me-2">Hi, {user?.username || 'user'}</span>
+              <Link className="btn btn-outline-primary btn-sm" to="/profile">👤 Profile</Link>
               <button className="btn btn-outline-danger btn-sm" onClick={onLogout}>🚪 Logout</button>
             </>
           )}

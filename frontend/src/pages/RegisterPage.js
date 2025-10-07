@@ -40,8 +40,8 @@ const RegisterPage = () => {
     try {
       const data = await registerUser(username, password, email);
       saveAuth(data.token, data.user);
-      toast.success('✓ Account created successfully!');
-      navigate('/');
+      toast.success('✓ Account created successfully! Welcome to ChemTutor!');
+      navigate('/profile');
     } catch (err) {
       const errorMsg = err?.response?.data?.error || 'Registration failed';
       setError(errorMsg);

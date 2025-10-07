@@ -32,7 +32,7 @@ const LoginPage = () => {
     try {
       const data = await loginUser(username, password);
       saveAuth(data.token, data.user);
-      navigate('/');
+      navigate('/profile');
     } catch (err) {
       setError(err?.response?.data?.error || 'Login failed');
     } finally {

@@ -12,6 +12,8 @@ from api.services.compound_lookup import lookup_compound
 from api.services.orchestrator import Orchestrator
 import logging
 import traceback
+from rest_framework import serializers
+from rest_framework.throttling import UserRateThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -244,3 +246,82 @@ class MeView(APIView):
     def get(self, request):
         user = request.user
         return Response({'id': user.id, 'username': user.username, 'email': user.email})
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'date_joined', 'last_login']
+        read_only_fields = ['id', 'username', 'date_joined', 'last_login']
+
+
+class ProfileUpdateThrottle(UserRateThrottle):
+    rate = '5/hour'
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ProfileUpdateThrottle]
+
+    def get(self, request):
+        """Get user profile information"""
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        """Update user profile information"""
+        user = request.user
+        email = request.data.get('email')
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+
+        # Update email if provided
+        if email is not None:
+            user.email = email
+
+        # Update password if both current and new passwords are provided
+        if current_password and new_password:
+            if not user.check_password(current_password):
+                return Response({'error': 'Current password is incorrect'}, status=400)
+            user.set_password(new_password)
+            # Update token after password change
+            Token.objects.filter(user=user).delete()
+            token = Token.objects.create(user=user)
+            user.save()
+            return Response({
+                'message': 'Profile updated successfully',
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            })
+
+        user.save()
+        return Response({
+            'message': 'Profile updated successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        })
+
+    def delete(self, request):
+        """Delete user account"""
+        user = request.user
+        password = request.data.get('password')
+
+        if not password:
+            return Response({'error': 'Password is required to delete account'}, status=400)
+
+        if not user.check_password(password):
+            return Response({'error': 'Incorrect password'}, status=401)
+
+        # Delete user's token
+        Token.objects.filter(user=user).delete()
+        # Delete user account
+        user.delete()
+
+        return Response({'message': 'Account deleted successfully'}, status=200)
