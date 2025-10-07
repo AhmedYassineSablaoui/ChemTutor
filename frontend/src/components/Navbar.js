@@ -26,6 +26,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
         <div className="collapse navbar-collapse d-flex justify-content-center">
           <ul className="navbar-nav">
             <li className="nav-item">
+              <Link className="nav-link" to="/">🏠 Home</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/about">ℹ️ About</Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link" to="/formatter">⚗️ Reaction Formatter</Link>
             </li>
             <li className="nav-item">

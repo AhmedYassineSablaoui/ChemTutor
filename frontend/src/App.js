@@ -1,10 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { healthCheck } from './api';
+import { useState } from 'react';
 import Navbar from './components/Navbar';
-import FeatureSelector from './components/FeatureSelector';
 import FormatterPage from './pages/FormatterPage';
 import QAPage from './pages/QAPage';
 import CorrectionPage from './pages/CorrectionPage';
@@ -15,36 +13,14 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import AboutPage from './pages/AboutPage';
+import HomePage from './pages/HomePage';
 
-function About() { return <h1>About ChemTutor</h1>; }
+function About() { return <AboutPage />; }
 function Login() { return <LoginPage />; }
 function Register() { return <RegisterPage />; }
 function Logout() { return <h1>Logout</h1>; }
-
-function Home() {
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    healthCheck()
-      .then(data => {
-        setStatus(data.status);
-        setError('');
-      })
-      .catch(() => {
-        setError('Failed to connect to API');
-        setStatus('');
-      });
-  }, []);
-
-  return (
-    <div>
-      <h1>Home - API Status: {status || 'Loading...'}</h1>
-      {error && <p className="text-danger">{error}</p>}
-      <FeatureSelector />
-    </div>
-  );
-}
+function Home() { return <HomePage />; }
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
