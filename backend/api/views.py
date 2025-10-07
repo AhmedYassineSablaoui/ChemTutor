@@ -9,24 +9,21 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from api.services.reaction_balancer import balance_reaction
 from api.services.compound_lookup import lookup_compound
-from api.services.chemberta_service import ChemBERTaService
-from api.services.retrieval_service import RetrievalService
-from api.services.correction_service import CorrectionService
+from api.services.orchestrator import Orchestrator
 import logging
 import traceback
 
 logger = logging.getLogger(__name__)
 
-@api_view(["GET"])
+@api_view(["GET"]) 
 def health_check(request):
     return Response({"status": "ok"})
 
 class QAAView(APIView):
     def __init__(self):
         super().__init__()
-        # Initialize services once when the view is created
-        self.retriever = RetrievalService()
-        self.generator = ChemBERTaService()
+        # Initialize orchestrator once
+        self.orchestrator = Orchestrator()
     
     def post(self, request):
         question = request.data.get('question')
@@ -34,10 +31,8 @@ class QAAView(APIView):
             return Response({'error': 'Missing question'}, status=400)
         
         try:
-            context_list = self.retriever.retrieve(question)
-            context = "\n".join(context_list)
-            answer = self.generator.generate_answer(f"Context: {context}\nQuestion: {question}")
-            return Response({'answer': answer, 'sources': context_list})
+            result = self.orchestrator.run_workflow("qa", question)
+            return Response({'answer': result.get('answer'), 'sources': result.get('sources', [])})
         except Exception as e:
             return Response({'error': f'Processing failed: {str(e)}'}, status=500)
 class BalanceReactionView(APIView):
@@ -83,20 +78,8 @@ class CorrectionView(APIView):
     
     def __init__(self):
         super().__init__()
-        # Initialize the correction service once when the view is created
-        self.correction_service = None
-    
-    def _get_correction_service(self):
-        """Lazy initialization of the correction service"""
-        if self.correction_service is None:
-            try:
-                self.correction_service = CorrectionService()
-                logger.info("CorrectionService initialized successfully")
-            except Exception as e:
-                logger.error(f"Failed to initialize CorrectionService: {str(e)}")
-                logger.error(traceback.format_exc())
-                raise
-        return self.correction_service
+        # Initialize orchestrator once
+        self.orchestrator = Orchestrator()
     
     def post(self, request):
         """
@@ -154,23 +137,10 @@ class CorrectionView(APIView):
                     'details': f'Statement length ({len(statement)}) exceeds maximum of 1000 characters'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Get correction service
-            try:
-                corrector = self._get_correction_service()
-            except Exception as e:
-                logger.error(f"Failed to load correction model: {str(e)}")
-                logger.error(traceback.format_exc())
-                return Response({
-                    'success': False,
-                    'error': 'Correction service initialization failed',
-                    'error_code': 'SERVICE_INIT_ERROR',
-                    'details': 'The correction model could not be loaded. Please ensure the model files are present.',
-                    'debug_info': str(e) if request.user.is_staff else None
-                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            
             # Perform correction
             try:
-                corrected_statement = corrector.correct(statement)
+                result = self.orchestrator.run_workflow("correction", statement)
+                corrected_statement = result.get('corrected')
                 
                 if not corrected_statement:
                     logger.warning(f"Empty correction result for statement: {statement[:100]}")

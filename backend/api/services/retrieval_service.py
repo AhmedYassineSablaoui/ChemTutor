@@ -94,3 +94,45 @@ class RetrievalService:
             ]
         
         return mock_sources[:top_k]
+    
+    def rebuild_faiss_index(self):
+        """
+        Rebuild the FAISS index from scratch.
+        This scans your documents directory and re-embeds them.
+        """
+        print("🔄 Starting FAISS index rebuild...")
+
+        # Step 1: Initialize embeddings (try both if needed)
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        from langchain_community.vectorstores import FAISS
+        import glob
+
+        try:
+            embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        except Exception:
+            embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+
+        # Step 2: Load documents (adapt path as needed)
+        docs_path = "./data/documents"
+        if not os.path.exists(docs_path):
+            print(f"⚠️ No documents found at {docs_path}")
+            return
+
+        texts = []
+        for file_path in glob.glob(os.path.join(docs_path, "*.txt")):
+            with open(file_path, "r", encoding="utf-8") as f:
+                texts.append(f.read())
+
+        if not texts:
+            print("⚠️ No text files found to index.")
+            return
+
+        print(f"📄 Found {len(texts)} documents, embedding and saving FAISS index...")
+
+        # Step 3: Build FAISS index
+        vectorstore = FAISS.from_texts(texts, embedding=embeddings)
+        save_path = "./data/faiss_index"
+        os.makedirs(save_path, exist_ok=True)
+        vectorstore.save_local(save_path)
+
+        print("✅ FAISS index rebuilt and saved at", save_path)

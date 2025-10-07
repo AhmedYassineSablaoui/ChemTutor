@@ -15,3 +15,5 @@ faiss-cpu==1.8.0
 pypdf==4.3.0
 llama-index-vector-stores-faiss==0.1.0
 llama-index-embeddings-huggingface==0.1.0
+langchain==0.2.0
+
