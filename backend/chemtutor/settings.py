@@ -87,11 +87,12 @@ WSGI_APPLICATION = 'chemtutor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'NAME': 'chemtutor_db',
+        'USER': 'chemtutor_user',
+        'PASSWORD': 'chemtutor__password_100',
         'HOST': 'db',
         'PORT': '5432',
+
     }
 }
 
