@@ -17,3 +17,7 @@ llama-index-vector-stores-faiss==0.1.0
 llama-index-embeddings-huggingface==0.1.0
 langchain==0.2.0
 langchain-huggingface
+django-redis
+django-ratelimit==4.1.0
+
+

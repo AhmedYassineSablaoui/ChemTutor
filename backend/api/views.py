@@ -13,14 +13,38 @@ from api.services.orchestrator import Orchestrator
 import logging
 import traceback
 import time
+import json
 from rest_framework import serializers
 from rest_framework.throttling import UserRateThrottle
+from django.core.cache import cache
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from .models import (
     UserProfile, LoginHistory, ReactionFormatter, 
     QAHistory, CorrectionHistory
 )
 
-logger = logging.getLogger(__name__)
+# Get logger instance for the api app
+logger = logging.getLogger('api')
+
+def log_error(exception, context=None, level='error'):
+    """Helper function to log errors with context"""
+    log_data = {
+        'error': str(exception),
+        'type': type(exception).__name__,
+        'context': context or {},
+        'traceback': traceback.format_exc()
+    }
+    
+    log_message = json.dumps(log_data, indent=2)
+    
+    if level.lower() == 'warning':
+        logger.warning(log_message)
+    else:
+        logger.error(log_message)
+    
+    return log_data
 
 @api_view(["GET"]) 
 def health_check(request):
@@ -32,10 +56,18 @@ class QAAView(APIView):
         # Initialize orchestrator once
         self.orchestrator = Orchestrator()
     
+    @method_decorator(ratelimit(key='ip', rate='100/h', method='POST', block=True), name='post')
     def post(self, request):
+        # Rate limiting is now handled by the decorator
         question = request.data.get('question')
         if not question:
             return Response({'error': 'Missing question'}, status=400)
+        
+        # Check cache first
+        cache_key = f"qa_{hash(question)}"
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return Response(cached_result)
         
         start_time = time.time()
         user = request.user if request.user.is_authenticated else None
@@ -43,6 +75,19 @@ class QAAView(APIView):
         try:
             result = self.orchestrator.run_workflow("qa", question)
             response_time = time.time() - start_time
+            
+            # Prepare response
+            response_data = {
+                'answer': result.get('answer'), 
+                'sources': result.get('sources', [])
+            }
+            
+            # Save to cache
+            cache.set(
+                cache_key, 
+                response_data, 
+                timeout=settings.CACHE_TIMEOUTS['QA_RESULT']
+            )
             
             # Save to QAHistory table
             QAHistory.objects.create(
@@ -54,91 +99,106 @@ class QAAView(APIView):
                 response_time=response_time
             )
             
-            return Response({'answer': result.get('answer'), 'sources': result.get('sources', [])})
+            return Response(response_data)
         except Exception as e:
             response_time = time.time() - start_time
             
-            # Save failed attempt to QAHistory table
-            QAHistory.objects.create(
-                user=user,
-                question=question,
-                is_successful=False,
-                error_message=str(e),
-                response_time=response_time
-            )
+            # Log the error with context
+            error_context = {
+                'user': str(user) if user else 'anonymous',
+                'question': question,
+                'response_time': response_time
+            }
+            log_error(e, context=error_context)
             
-            return Response({'error': f'Processing failed: {str(e)}'}, status=500)
+            # Save failed attempt to QAHistory table
+            try:
+                QAHistory.objects.create(
+                    user=user,
+                    question=question,
+                    is_successful=False,
+                    error_message=str(e),
+                    response_time=response_time
+                )
+            except Exception as db_error:
+                logger.error(f"Failed to save QA history: {str(db_error)}")
+            return Response(
+                {'error': 'An error occurred while processing your request', 'error_code': 'QA_PROCESSING_ERROR'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 class BalanceReactionView(APIView):
+    @method_decorator(ratelimit(key='ip', rate='200/h', method='POST', block=True))
     def post(self, request):
+        # Rate limiting is now handled by the decorator
         input_reaction = request.data.get('input')
         user = request.user if request.user.is_authenticated else None
-        
-        if not input_reaction:
-            return Response(
-                {'error': 'Missing input'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+
+        # Basic validation before processing
+        if not input_reaction or not isinstance(input_reaction, str):
+            return Response({
+                'success': False,
+                'error': 'Missing or invalid input',
+                'error_code': 'INVALID_INPUT',
+                'details': 'Provide a non-empty string in the "input" field (e.g., "H2 + O2 -> H2O").'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        input_reaction = input_reaction.strip()
+        if '->' not in input_reaction:
+            return Response({
+                'success': False,
+                'error': 'Invalid reaction format',
+                'error_code': 'INVALID_FORMAT',
+                'details': 'Reaction must include "->" separator between reactants and products.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             result = balance_reaction(input_reaction)
+            # Return result at the top level so frontend can read result.balanced
+            result_payload = {
+                'success': True,
+                **result
+            }
+            return Response(result_payload, status=status.HTTP_200_OK)
 
-            # 🔹 Add metadata enrichment
-            enriched_metadata = {}
-            for side in ["reactants", "products"]:
-                enriched_metadata[side] = []
-                for token in input_reaction.replace("->", "+").split("+"):
-                    token = token.strip()
-                    if token:
-                        meta = lookup_compound(token)
-                        if meta:
-                            enriched_metadata[side].append(meta)
-
-            result["metadata"] = enriched_metadata
-            
-            # Save to ReactionFormatter table
-            ReactionFormatter.objects.create(
-                user=user,
-                input_reaction=input_reaction,
-                balanced_reaction=result.get('balanced'),
-                reactants=result.get('reactants'),
-                products=result.get('products'),
-                metadata=enriched_metadata,
-                is_successful=True
-            )
-
-            return Response(result)
         except ValueError as e:
-            # Save failed attempt to ReactionFormatter table
-            ReactionFormatter.objects.create(
-                user=user,
-                input_reaction=input_reaction,
-                is_successful=False,
-                error_message=str(e)
-            )
-            
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            # Likely parsing/lookup issues
+            log_error(e, context={'endpoint': 'balance_reaction', 'user': str(user) if user else 'anonymous', 'input': input_reaction})
+            return Response({
+                'success': False,
+                'error': 'Reaction parsing failed',
+                'error_code': 'PARSING_ERROR',
+                'details': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Unexpected error
+            log_error(e, context={'endpoint': 'balance_reaction', 'user': str(user) if user else 'anonymous', 'input': input_reaction})
+            return Response({
+                'success': False,
+                'error': 'Internal server error',
+                'error_code': 'INTERNAL_ERROR',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CorrectionView(APIView):
-    """
-    API endpoint for correcting chemistry statements using the correction model.
+    """API endpoint for correcting chemistry statements using the correction model.
     
     POST /api/correction/
     Request body: {"statement": "Your chemistry statement here"}
     Response: {"original": "...", "corrected": "...", "success": true}
     """
-    
     def __init__(self):
         super().__init__()
         # Initialize orchestrator once
         self.orchestrator = Orchestrator()
-    
+        
+    @method_decorator(ratelimit(key='ip', rate='150/h', method='POST', block=True))
     def post(self, request):
+        # Rate limiting is now handled by the decorator
         """
         Correct a chemistry statement.
         
+{{ ... }}
         Request body:
         {
             "statement": "The chemistry statement to correct"
@@ -155,6 +215,13 @@ class CorrectionView(APIView):
         try:
             # Validate input
             statement = request.data.get('statement')
+            
+            # Check cache first
+            cache_key = f"correction_{hash(statement)}" if statement else None
+            if cache_key:
+                cached_result = cache.get(cache_key)
+                if cached_result:
+                    return Response(cached_result)
             
             if not statement:
                 return Response({
@@ -198,6 +265,22 @@ class CorrectionView(APIView):
             try:
                 result = self.orchestrator.run_workflow("correction", statement)
                 corrected_statement = result.get('corrected')
+                
+                # Prepare response data
+                response_data = {
+                    'success': True,
+                    'original': statement,
+                    'corrected': corrected_statement,
+                    'changed': corrected_statement.lower() != statement.lower()
+                }
+                
+                # Save to cache if we have a valid cache key
+                if cache_key:
+                    cache.set(
+                        cache_key,
+                        response_data,
+                        timeout=settings.CACHE_TIMEOUTS['CORRECTION_RESULT']
+                    )
                 response_time = time.time() - start_time
                 
                 if not corrected_statement:
@@ -222,22 +305,15 @@ class CorrectionView(APIView):
                 # Determine if the statement was changed
                 changed = statement.lower().strip() != corrected_statement.lower().strip()
                 
-                # Save to CorrectionHistory table
                 CorrectionHistory.objects.create(
                     user=user,
                     original_statement=statement,
                     corrected_statement=corrected_statement,
-                    was_changed=changed,
                     is_successful=True,
-                    response_time=response_time
+                    response_time=time.time() - start_time
                 )
                 
-                return Response({
-                    'success': True,
-                    'original': statement,
-                    'corrected': corrected_statement,
-                    'changed': changed
-                }, status=status.HTTP_200_OK)
+                return Response(response_data, status=status.HTTP_200_OK)
                 
             except RuntimeError as e:
                 response_time = time.time() - start_time
@@ -258,34 +334,11 @@ class CorrectionView(APIView):
                     'error': 'Model inference failed',
                     'error_code': 'INFERENCE_ERROR',
                     'details': 'An error occurred during model prediction',
-                    'debug_info': str(e) if request.user.is_staff else None
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            except Exception as e:
-                response_time = time.time() - start_time
-                logger.error(f"Unexpected error during correction: {str(e)}")
-                logger.error(traceback.format_exc())
-                
-                # Save failed attempt to CorrectionHistory table
-                CorrectionHistory.objects.create(
-                    user=user,
-                    original_statement=statement,
-                    is_successful=False,
-                    error_message=f'Processing error: {str(e)}',
-                    response_time=response_time
-                )
-                
-                return Response({
-                    'success': False,
-                    'error': 'Correction processing failed',
-                    'error_code': 'PROCESSING_ERROR',
-                    'details': 'An unexpected error occurred while processing your request',
-                    'debug_info': str(e) if request.user.is_staff else None
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
         except Exception as e:
             # Catch-all for any unexpected errors
-            logger.error(f"Unhandled error in CorrectionView: {str(e)}")
+            logger.error(f"Unhandled error in CorrectionView: {str(e)}", exc_info=True)
             logger.error(traceback.format_exc())
             return Response({
                 'success': False,
