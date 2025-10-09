@@ -73,12 +73,14 @@ class Orchestrator:
         Run the requested feature (e.g., correction, classification, etc.)
         """
         if feature == "qa":
+            print("🟡 Q&A input data:", input_data)
             # Retrieve context and run LangChain Q&A
             context_list = self.retrieval_service.retrieve(input_data)
             context = "\n".join(context_list)
+            print("🟡 Q&A retrieved context:", context_list)
             if self.qa_chain is None:
-                # Fallback: no LLM available
-                return {
+                 print("🔴 Q&A: LLM pipeline not available!")
+                 return {
                     "feature": "qa",
                     "input": input_data,
                     "answer": "LLM not available. Please ensure the ChemBERTa model is installed.",
@@ -86,6 +88,7 @@ class Orchestrator:
                 }
             # RunnableSequence returns a string
             answer = self.qa_chain.invoke({"context": context, "question": input_data})
+            print("🟢 Q&A model answer:", answer)
             return {
                 "feature": "qa",
                 "input": input_data,
@@ -96,9 +99,13 @@ class Orchestrator:
         elif feature == "correction":
             # Prefer LangChain correction chain if available, else fallback to service.correct
             if self.correction_chain is not None:
-                corrected = self.correction_chain.invoke({"statement": input_data})
+                    print("🟡 Invoking correction_chain with input:", input_data)
+                    corrected = self.correction_chain.invoke({"statement": input_data})
+                    print("🟢 Correction chain output:", corrected)
             else:
-                corrected = self.correction_service.correct(input_data)
+                    print("🟡 Falling back to correction_service for input:", input_data)
+                    corrected = self.correction_service.correct(input_data)
+                    print("🟢 Correction service output:", corrected)
             return {
                 "feature": "correction",
                 "input": input_data,
