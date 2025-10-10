@@ -47,7 +47,7 @@ services:
     environment:
       - DEBUG=1
       - REDIS_URL=redis://redis:6379/0
-      - PYTHONPATH=/app   # 👈 ensures pytest can find 'api' and 'chemtutor'
+      - PYTHONPATH=/app   
       
 
 volumes:
