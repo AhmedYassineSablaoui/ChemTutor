@@ -1,0 +1,42 @@
+# ---- Python / Django ----
+*.pyc
+__pycache__/
+db.sqlite3
+venv/
+.env
+*.log
+media/
+staticfiles/
+
+# ---- Django secrets ----
+pytest.ini
+*.secret
+*.key
+*.pem
+
+# ---- Node / React ----
+node_modules/
+build/
+dist/
+.env.local
+.env.development
+.env.production
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- Docker ----
+*.pid
+*.sock
+*.db
+*.tar
+*.bak
+
+# ---- System ----
+.DS_Store
+Thumbs.db
+# ---- Ignore local model files ----
+backend/models/
