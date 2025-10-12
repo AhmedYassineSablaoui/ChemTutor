@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerUser, saveAuth } from '../api';
+import { registerUser } from '../api';
 import {
   Box,
   Card,
@@ -14,7 +14,7 @@ import {
   Alert,
   Stack,
   Divider,
-  Paper
+  // Paper
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -38,7 +38,7 @@ const RegisterPage = () => {
     setLoading(true);
     
     try {
-      const data = await registerUser(username, password, email);
+      await registerUser(username, password, email);
       // Do not auto-login here! Instead, show a success toast and redirect to /login
       toast.success('✓ Account created successfully! Please log in to continue.');
       navigate('/login');

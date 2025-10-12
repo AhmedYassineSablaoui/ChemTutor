@@ -10,10 +10,10 @@ import {
   Divider,
   Chip,
   Paper,
-  Grid
+  // Grid
 } from '@mui/material';
 import Button from '@mui/material/Button';
-import ScienceIcon from '@mui/icons-material/Science';
+// import ScienceIcon from '@mui/icons-material/Science';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -27,7 +27,7 @@ export default function QAPage() {
   const [error, setError] = useState(null);
   const [answer, setAnswer] = useState('');
   const [sources, setSources] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState('');
+  // const [currentQuestion, setCurrentQuestion] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [followUpQuestions, setFollowUpQuestions] = useState([]);
 
@@ -69,7 +69,7 @@ export default function QAPage() {
   };
 
   // Generate follow-up questions based on the current question and answer
-  const generateFollowUpQuestions = (question, answer) => {
+  const generateFollowUpQuestions = (question) => {
     const followUpQuestions = [
       `Can you explain the key concepts in "${question}" in more detail?`,
       `What are some practical applications of the topic in "${question}"?`,
@@ -126,7 +126,7 @@ export default function QAPage() {
         toast.error(`Error: ${errorMsg}`);
       }
     } catch (err) {
-      console.error('Follow-up question error:', err);
+      // console.error('Follow-up question error:', err);
       setError({
         message: 'Failed to generate follow-up answer',
         details: err.message || 'Please try again.',

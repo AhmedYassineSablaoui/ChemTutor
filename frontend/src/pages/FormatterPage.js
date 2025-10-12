@@ -13,10 +13,10 @@ import {
   Divider,
   Chip,
   Paper,
-  Grid
+  // Grid
 } from "@mui/material";
 import Button from '@mui/material/Button';
-import ScienceIcon from '@mui/icons-material/Science';
+// import ScienceIcon from '@mui/icons-material/Science';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -26,7 +26,7 @@ const FormatterPage = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentReaction, setCurrentReaction] = useState('');
+  // const [currentReaction, setCurrentReaction] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [relatedReactions, setRelatedReactions] = useState([]);
 
@@ -97,7 +97,7 @@ const FormatterPage = () => {
         toast.error(`Error: ${errorMsg}`);
       }
     } catch (err) {
-      console.error('Reaction balancing error:', err);
+      // console.error('Reaction balancing error:', err);
 
       // Handle different error scenarios
       if (err.response?.data) {

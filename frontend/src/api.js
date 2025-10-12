@@ -21,7 +21,7 @@ export const healthCheck = async () => {
     const response = await api.get('health/');
     return response.data;
   } catch (error) {
-    console.error('Health check failed:', error);
+    // console.error('Health check failed:', error);
     throw error;
   }
 };
@@ -37,7 +37,7 @@ export const askQuestion = async (question, category) => {
     const response = await api.post('qa/', { question, category });
     return response.data;
   } catch (error) {
-    console.error('QA request failed:', error);
+    // console.error('QA request failed:', error);
     throw error;
   }
 };
@@ -48,7 +48,7 @@ export const correctStatement = async (statement) => {
     const response = await api.post('correction/', { statement });
     return response.data;
   } catch (error) {
-    console.error('Correction request failed:', error);
+    // console.error('Correction request failed:', error);
     throw error;
   }
 };

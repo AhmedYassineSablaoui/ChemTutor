@@ -13,7 +13,7 @@ import {
   Grid
 } from '@mui/material';
 import Button from '@mui/material/Button';
-import ScienceIcon from '@mui/icons-material/Science';
+// import ScienceIcon from '@mui/icons-material/Science';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -27,7 +27,7 @@ const CorrectionPage = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [currentStatement, setCurrentStatement] = useState('');
+  // const [currentStatement, setCurrentStatement] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [relatedStatements, setRelatedStatements] = useState([]);
 
@@ -107,7 +107,7 @@ const CorrectionPage = () => {
         toast.error(`Error: ${errorMsg}`);
       }
     } catch (err) {
-      console.error('Correction error:', err);
+      // console.error('Correction error:', err);
       
       // Handle different error scenarios
       if (err.response?.data) {
