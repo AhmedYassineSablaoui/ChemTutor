@@ -5,9 +5,9 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_DB: "######" #put tour database name
-      POSTGRES_USER: "######" #put tour database user
-      POSTGRES_PASSWORD:  "######" #put tour database password
+      POSTGRES_DB: chemtutor_db
+      POSTGRES_USER: chemtutor_user
+      POSTGRES_PASSWORD: chemtutor__password_100  
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

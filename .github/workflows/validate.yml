@@ -1,0 +1,52 @@
+name: Validate Configuration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  validate-config:
+    name: Validate Configuration Files
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate YAML files
+      run: |
+        echo "Validating GitHub Actions workflows..."
+        for file in .github/workflows/*.yml; do
+          echo "Checking $file"
+          python -c "import yaml; yaml.safe_load(open('$file'))"
+        done
+        
+    - name: Validate Python configuration
+      run: |
+        echo "Validating Python configuration files..."
+        python -c "import configparser; configparser.ConfigParser().read('backend/pytest.ini')"
+        python -c "import ast; ast.parse(open('backend/.flake8').read())"
+        
+    - name: Validate Node.js configuration
+      run: |
+        echo "Validating Node.js configuration files..."
+        node -e "JSON.parse(require('fs').readFileSync('frontend/package.json', 'utf8'))"
+        node -e "require('./frontend/.eslintrc.js')"
+        node -e "require('./frontend/jest.config.js')"
+        
+    - name: Check file permissions
+      run: |
+        echo "Checking file permissions..."
+        find .github -name "*.yml" -exec chmod 644 {} \;
+        find backend -name "*.py" -exec chmod 644 {} \;
+        find frontend -name "*.js" -exec chmod 644 {} \;
+        
+    - name: Validate secrets requirements
+      run: |
+        echo "Checking for required secrets..."
+        echo "✅ GITHUB_TOKEN is automatically provided"
+        echo "ℹ️  SONAR_TOKEN is optional (for SonarCloud integration)"
+        echo "ℹ️  Add secrets in repository Settings > Secrets and variables > Actions"

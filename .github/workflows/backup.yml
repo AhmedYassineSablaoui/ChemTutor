@@ -1,0 +1,44 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup-database:
+    name: Backup Database
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create database backup
+      working-directory: ./backend
+      run: |
+        python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 2 > backup_$(date +%Y%m%d_%H%M%S).json
+        
+    - name: Upload backup to GitHub
+      uses: actions/upload-artifact@v4
+      with:
+        name: database-backup-${{ github.run_number }}
+        path: backend/backup_*.json
+        retention-days: 30
+        
+    - name: Notify backup completion
+      run: |
+        echo "✅ Database backup completed successfully!"
+        echo "📦 Backup artifact: database-backup-${{ github.run_number }}"
