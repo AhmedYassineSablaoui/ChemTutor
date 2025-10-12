@@ -9,6 +9,8 @@ It handles:
 - Compound lookup
 - Health checks
 - Communication with AI models (T-5 small, Transformers)
+- Chemistry question correction
+- chemistry  Q&A 
 
 ---
 
@@ -19,7 +21,8 @@ It handles:
 - PostgreSQL + Redis
 - RDKit (molecule parsing, reactions)
 - PubChemPy (compound metadata)
-- Transformers + Torch (ChemBERTa model)
+- Transformers + Torch (T5-small model)
+- LlamaIndex + LangChain
 
 ---
 
@@ -60,6 +63,12 @@ pytest-django==4.9.0
 | `/api/health/`            | GET    | Check API status |
 | `/api/reactions/balance/` | POST   | Balance a chemical reaction |
 | `/admin/`                 | GET    | Django admin panel |
+| `/qa/`                    | POST   | Q&A                |
+| `/correction/`             | POST   | Correct chemistry questions|        
+| `/auth/profile/`           | GET    | get Profile infos |
+| `/auth/logout/`            | GET    | log out the authentification
+| `/auth/login/`             | POST   | Log in        |
+| `/auth/register/`          | POST   | Register
 
 
 ## 🚀 Run Locally (Docker)

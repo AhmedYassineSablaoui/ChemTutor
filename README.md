@@ -27,7 +27,7 @@ It combines modern AI models with chemistry-specific tools like **RDKit** and **
 | 🔄 Backend   | Django REST Framework |
 | 🧠 AI Core   | T-5 small, Transformers, Torch |
 | 🧪 Tools     | RDKit, PubChemPy |
-| 🔍 Retrieval | LlamaIndex (optional), local chemistry PDFs |
+| 🔍 Retrieval | LlamaIndex , local chemistry PDFs |
 | 🐳 Runtime   | Docker + WSL2 |
 | 📊 Database  | PostgreSQL, Redis |
 
