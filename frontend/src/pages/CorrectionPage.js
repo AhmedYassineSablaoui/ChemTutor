@@ -354,7 +354,7 @@ const CorrectionPage = () => {
                 <Typography variant="body2" component="div">
                   <ol style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
                     <li>Enter or paste your chemistry statement in the text field above</li>
-                    <li>Click "Correct Statement" to process your text</li>
+                    <li>Click &quot;Correct Statement&quot; to process your text</li>
                     <li>Review the corrected version and any changes made</li>
                     <li>Click on example chips to try pre-made statements</li>
                   </ol>

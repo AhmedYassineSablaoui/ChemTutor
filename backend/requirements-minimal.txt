@@ -1,0 +1,16 @@
+# Minimal requirements for testing - no ML dependencies
+Django==4.2.7
+django-cors-headers==4.3.1
+django-ratelimit==4.1.0
+django-redis==6.0.0
+djangorestframework==3.14.0
+gunicorn==23.0.0
+whitenoise==6.11.0
+psycopg2-binary==2.9.9
+dj-database-url==3.0.1
+redis==5.0.1
+
+# Testing dependencies
+pytest==8.3.2
+pytest-django==4.9.0
+pytest-cov==5.0.0

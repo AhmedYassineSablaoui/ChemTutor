@@ -17,12 +17,18 @@ const QAInput = ({ onSubmit }) => {
         const parsed = JSON.parse(raw);
         setHistory(parsed.sort((a, b) => b.ts - a.ts).slice(0, 20));
       }
-    } catch {}
+    } catch (error) {
+      console.warn('Failed to load QA history:', error);
+    }
   }, []);
 
   const saveHistory = (next) => {
     setHistory(next);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next.slice(0, 50))); } catch {}
+    try { 
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next.slice(0, 50))); 
+    } catch (error) {
+      console.warn('Failed to save QA history:', error);
+    }
   };
 
   const handleSubmit = () => {

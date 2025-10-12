@@ -352,7 +352,7 @@ const FormatterPage = () => {
                 <Typography variant="body2" component="div">
                   <ol style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
                     <li>Enter an unbalanced chemical equation in the text field above</li>
-                    <li>Click "Balance Reaction" to process the equation</li>
+                    <li>Click &quot;Balance Reaction&quot; to process the equation</li>
                     <li>Review the balanced equation and any additional insights</li>
                     <li>Use the reaction type and mechanism hints to understand the reaction better</li>
                   </ol>

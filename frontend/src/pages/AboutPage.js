@@ -132,7 +132,7 @@ export default function AboutPage() {
             knowledge to provide accurate, instant assistance for all your chemistry needs.
           </Typography>
           <Typography variant="body1">
-            Whether you're balancing complex equations, seeking answers to chemistry questions, or correcting
+            Whether you&apos;re balancing complex equations, seeking answers to chemistry questions, or correcting
             scientific statements, ChemTutor is here to help you succeed in your chemistry journey.
           </Typography>
         </CardContent>

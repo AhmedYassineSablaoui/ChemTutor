@@ -322,7 +322,7 @@ export default function QAPage() {
                   <ol style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
                     <li>Enter your chemistry question in the text field above</li>
                     <li>Select a category to help focus the search (optional)</li>
-                    <li>Click "Ask Question" to generate an answer</li>
+                    <li>Click &quot;Ask Question&quot; to generate an answer</li>
                     <li>Review the answer and check the provided sources</li>
                   </ol>
                 </Typography>

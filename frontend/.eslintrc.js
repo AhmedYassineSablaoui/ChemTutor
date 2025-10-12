@@ -24,6 +24,8 @@ module.exports = {
     'react/prop-types': 'off',
     'no-unused-vars': 'warn',
     'no-console': 'warn',
+    'no-empty': 'warn',
+    'react/no-unescaped-entities': 'warn',
   },
   settings: {
     react: {
