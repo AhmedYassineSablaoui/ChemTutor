@@ -27,7 +27,7 @@ const CorrectionPage = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  // const [currentStatement, setCurrentStatement] = useState('');
+  const [currentStatement, setCurrentStatement] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [relatedStatements, setRelatedStatements] = useState([]);
 

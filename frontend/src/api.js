@@ -17,13 +17,8 @@ api.interceptors.request.use((config) => {
 });
 
 export const healthCheck = async () => {
-  try {
-    const response = await api.get('health/');
-    return response.data;
-  } catch (error) {
-    // console.error('Health check failed:', error);
-    throw error;
-  }
+  const response = await api.get('health/');
+  return response.data;
 };
 
 export const balanceReaction = async (input) => {
@@ -33,24 +28,14 @@ export const balanceReaction = async (input) => {
 
 // Ask question
 export const askQuestion = async (question, category) => {
-  try {
-    const response = await api.post('qa/', { question, category });
-    return response.data;
-  } catch (error) {
-    // console.error('QA request failed:', error);
-    throw error;
-  }
+  const response = await api.post('qa/', { question, category });
+  return response.data;
 };
 
 // Correct chemistry statement
 export const correctStatement = async (statement) => {
-  try {
-    const response = await api.post('correction/', { statement });
-    return response.data;
-  } catch (error) {
-    // console.error('Correction request failed:', error);
-    throw error;
-  }
+  const response = await api.post('correction/', { statement });
+  return response.data;
 };
 
 // Auth APIs

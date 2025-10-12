@@ -26,7 +26,7 @@ const FormatterPage = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // const [currentReaction, setCurrentReaction] = useState('');
+  const [currentReaction, setCurrentReaction] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [relatedReactions, setRelatedReactions] = useState([]);
 

@@ -27,7 +27,7 @@ export default function QAPage() {
   const [error, setError] = useState(null);
   const [answer, setAnswer] = useState('');
   const [sources, setSources] = useState([]);
-  // const [currentQuestion, setCurrentQuestion] = useState('');
+  const [currentQuestion, setCurrentQuestion] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [followUpQuestions, setFollowUpQuestions] = useState([]);
 
