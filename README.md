@@ -38,6 +38,7 @@ It combines modern AI models with chemistry-specific tools like **RDKit** and **
 ChemTutor/
 ├── backend/ # Django REST API
 ├── frontend/ # React.js frontend
+├── ML-NLP/ # Machine Learning Notebooks
 ├── .env # Environment variables
 ├── docker-compose.yml
 ├── package.json
@@ -46,6 +47,19 @@ ChemTutor/
 
 
 ---
+
+## 🧠 Machine Learning Notebooks
+
+The `ML-NLP/` folder contains experiments and fine-tuning scripts used to power the AI features of ChemTutor:
+
+1. **Correction_Chem.ipynb** — fine-tuning the `t5-small` model for chemistry statement correction.
+2. **Ingestion.ipynb** — document ingestion and Q&A using LlamaIndex and a chemistry PDF.
+3. **ChemTutor.ipynb** — fine-tuning `t5-small` for chemistry-related question-answer tasks.
+
+
+
+---
+
 
 ## ⚡ Quick Start (Docker)
 
